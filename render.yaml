@@ -63,6 +63,6 @@ services:
     startCommand: "npx serve -s dist -l $PORT"
     envVars:
       - key: VITE_API_BASE_URL
-        value: "https://astrotalk-server-ustn.onrender.com/api"
+        value: "https://astrotalk-server.onrender.com/api"
       - key: VITE_RAZORPAY_KEY_ID
         value: "rzp_test_R9C1HiBHTDcATb"
