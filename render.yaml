@@ -1,0 +1,68 @@
+services:
+  # -------------------- Backend --------------------
+  - type: web
+    name: astrotalk-server
+    env: node
+    buildCommand: "npm install"
+    startCommand: "npm start"
+    plan: free
+    branch: main
+    region: oregon
+    rootDir: backend
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "4000"
+      - key: MONGO_URI
+        value: "mongodb+srv://rg23692369:2FveP7CfQTgOdmEE@cluster0.mtzw4r5.mongodb.net/astro_db?retryWrites=true&w=majority&appName=Cluster0"
+      - key: JWT_SECRET
+        value: "aa26ffad684c359ec9353b"
+      - key: CLIENT_URL
+        value: "https://astrotalk-client.onrender.com"
+      - key: RAZORPAY_KEY_ID
+        value: "rzp_test_R9C1HiBHTDcATb"
+      - key: RAZORPAY_KEY_SECRET
+        value: "P51LHxna0Ljwd53i10wDc2tF"
+      - key: RAZORPAY_WEBHOOK_SECRET
+        value: "Gm23692369"
+      - key: USE_PIESOCKET
+        value: "true"
+      - key: WS_PIESOCKET_URL
+        value: "wss://s15085.blr1.piesocket.com/v3/1?"
+      - key: WS_PIESOCKET_TOKEN
+        value: "b2122d4366523f01c09f1af26abaeabfd234b4c6"
+      - key: PIESOCKET_API_KEY
+        value: "nuYwasEdOZ80rMuLoLiXTn2F6wOjqhPMGkdABxly"
+      - key: PIESOCKET_NOTIFY_SELF
+        value: "1"
+      - key: TURN_DOMAIN
+        value: "turn.yourdomain.com"
+      - key: TURN_PORT_TLS
+        value: "5349"
+      - key: TURN_STATIC_AUTH_SECRET
+        value: "changeme-static-secret"
+      - key: STUN_URL
+        value: "stun:stun.l.google.com:19302"
+      - key: TURN_TLS
+        value: "true"
+      - key: AUTH0_DOMAIN
+        value: "dev-1qdadgghp0shrf58"
+      - key: OPENAI_API_KEY
+        sync: false   # optional, leave empty if not using AI
+
+  # -------------------- Frontend --------------------
+  - type: web
+    name: astrotalk-client
+    env: node
+    plan: free
+    branch: main
+    region: oregon
+    rootDir: frontend
+    buildCommand: "npm install && npm run build"
+    startCommand: "npx serve -s dist -l $PORT"
+    envVars:
+      - key: VITE_API_BASE_URL
+        value: "https://astrotalk-server.onrender.com/api"
+      - key: VITE_RAZORPAY_KEY_ID
+        value: "rzp_test_R9C1HiBHTDcATb"
