@@ -19,27 +19,31 @@ const signJWT = (user) =>
 router.post("/signup", async (req, res) => {
   try {
     const { username, email, password, role } = req.body;
+
     if (!username || !email || !password) {
       return res.status(400).json({ error: "Username, email, and password are required" });
     }
 
-    // Check if user already exists
     const exists = await User.findOne({ $or: [{ email }, { username }] });
     if (exists) return res.status(400).json({ error: "User already exists" });
 
     const hashed = await bcrypt.hash(password, 10);
     const user = await User.create({ username, email, password: hashed, role: role || "user" });
 
-    // Create astrologer profile if role = astrologer
+    // If astrologer, create profile
     if (user.role === "astrologer") {
-      await AstrologerProfile.create({
-        user: user._id,
-        displayName: username,
-        perMinuteRate: 0, // default free
-        isOnline: false,  // default offline
-        languages: [],
-        expertise: [],
-      });
+      await AstrologerProfile.findOneAndUpdate(
+        { user: user._id },
+        {
+          user: user._id,
+          displayName: username,
+          perMinuteRate: 0, // default free
+          isOnline: false,  // default offline
+          languages: [],
+          expertise: [],
+        },
+        { new: true, upsert: true }
+      );
     }
 
     const token = signJWT(user);
@@ -63,11 +67,12 @@ router.post("/login", async (req, res) => {
     const ok = await bcrypt.compare(password, user.password);
     if (!ok) return res.status(400).json({ error: "Invalid credentials" });
 
-    // Set astrologer online if logged in
+    // If astrologer, mark online
     if (user.role === "astrologer") {
       await AstrologerProfile.findOneAndUpdate(
         { user: user._id },
-        { isOnline: true }
+        { isOnline: true },
+        { new: true, upsert: true }
       );
     }
 
@@ -84,7 +89,8 @@ router.post("/logout", isAuthenticated, async (req, res) => {
     if (req.user.role === "astrologer") {
       await AstrologerProfile.findOneAndUpdate(
         { user: req.user._id },
-        { isOnline: false }
+        { isOnline: false },
+        { new: true }
       );
     }
     res.json({ message: "Logged out successfully" });
