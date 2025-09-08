@@ -38,7 +38,7 @@ router.post("/signup", async (req, res) => {
           user: user._id,
           displayName: username,
           perMinuteRate: 0, // default free
-          isOnline: false,  // default offline
+          isOnline: true,  // default offline
           languages: [],
           expertise: [],
         },
