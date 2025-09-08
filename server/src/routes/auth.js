@@ -29,12 +29,12 @@ router.post("/signup", async (req, res) => {
     const hashed = await bcrypt.hash(password, 10);
     const user = await User.create({ username, email, password: hashed, role: role || "user" });
 
-    // ✅ Create astrologer profile if role is astrologer
+    // Create astrologer profile if role = astrologer
     if (user.role === "astrologer") {
       await AstrologerProfile.create({
         user: user._id,
         displayName: username,
-        perMinuteRate: 0, // default free; astrologer can set later
+        perMinuteRate: 0, // default free session
         isOnline: false,  // default offline
         languages: [],
         expertise: [],
@@ -62,7 +62,7 @@ router.post("/login", async (req, res) => {
     const ok = await bcrypt.compare(password, user.password);
     if (!ok) return res.status(400).json({ error: "Invalid credentials" });
 
-    // ✅ Set astrologer online on login, DO NOT change perMinuteRate
+    // Set astrologer online on login
     if (user.role === "astrologer") {
       await AstrologerProfile.findOneAndUpdate(
         { user: user._id },
@@ -93,3 +93,5 @@ router.post("/logout", isAuthenticated, async (req, res) => {
 });
 
 export default router;
+
+
