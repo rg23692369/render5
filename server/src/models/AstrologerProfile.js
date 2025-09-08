@@ -6,7 +6,7 @@ const astrologerProfileSchema = new mongoose.Schema({
   bio: { type: String, default: "" },
   languages: { type: [String], default: [] },
   expertise: { type: [String], default: [] },
-  perMinuteRate: { type: Number, required: true, min: 1 },
+  perMinuteRate: { type: Number, required: true, default: 0, min: 0 }, // allow 0 for free sessions
   isOnline: { type: Boolean, default: false }
 }, { timestamps: true });
 
