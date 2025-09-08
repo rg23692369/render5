@@ -4,12 +4,7 @@ import { isAuthenticated, roleRequired } from "../middleware/auth.js";
 
 const router = express.Router();
 
-/**
- * ✅ Get all astrologers (default: only online)
- * Query params:
- *   ?all=1 → fetch everyone
- *   ?q=tarot → search by name/expertise/languages
- */
+// ------------------ Get all astrologers ------------------
 router.get("/", async (req, res) => {
   try {
     const { all, q } = req.query;
@@ -34,17 +29,13 @@ router.get("/", async (req, res) => {
   }
 });
 
-/**
- * ✅ Get single astrologer by ID
- */
+// ------------------ Get single astrologer by ID ------------------
 router.get("/:id", async (req, res) => {
   try {
     const astrologer = await AstrologerProfile.findById(req.params.id)
       .populate("user", "username email");
 
-    if (!astrologer) {
-      return res.status(404).json({ error: "Astrologer not found" });
-    }
+    if (!astrologer) return res.status(404).json({ error: "Astrologer not found" });
 
     res.json(astrologer);
   } catch (err) {
@@ -53,21 +44,35 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-/**
- * ✅ Astrologer updates their own profile
- * Only allowed if role = astrologer
- */
+// ------------------ Update own profile (astrologer only) ------------------
 router.put(
   "/me",
-  isAuthenticated,          // check logged-in
-  roleRequired("astrologer"), // check role
+  isAuthenticated,
+  roleRequired("astrologer"),
   async (req, res) => {
     try {
-      const { displayName, bio, languages, expertise, perMinuteRate, isOnline } = req.body;
+      const {
+        displayName,
+        bio,
+        languages,
+        expertise,
+        perMinuteRate,
+        isOnline,
+      } = req.body;
+
+      // ✅ Ensure defaults if not provided
+      const updateData = {
+        displayName: displayName || req.user.username,
+        bio: bio || "",
+        languages: Array.isArray(languages) ? languages : [],
+        expertise: Array.isArray(expertise) ? expertise : [],
+        perMinuteRate: perMinuteRate != null ? perMinuteRate : 0,
+        isOnline: isOnline != null ? isOnline : true, // default true when updating
+      };
 
       const profile = await AstrologerProfile.findOneAndUpdate(
         { user: req.user._id },
-        { displayName, bio, languages, expertise, perMinuteRate, isOnline },
+        updateData,
         { new: true, upsert: true }
       ).populate("user", "username email");
 
@@ -80,3 +85,4 @@ router.put(
 );
 
 export default router;
+
