@@ -10,11 +10,11 @@ export default function App() {
   const [astrologers, setAstrologers] = useState([]);
   const [wallet, setWallet] = useState(0);
 
-  // Fetch astrologers list
+  // Fetch only online astrologers
   useEffect(() => {
-    api.get("/astrologers")
-      .then((res) => setAstrologers(res.data))
-      .catch((err) => console.error("Astrologers load error:", err));
+    api.get("/astrologers")  // backend defaults to isOnline: true
+      .then(res => setAstrologers(res.data))
+      .catch(err => console.error("Astrologers load error:", err));
   }, []);
 
   // Fetch wallet balance if logged in
@@ -61,14 +61,19 @@ export default function App() {
       return;
     }
 
+    if (!astro.isOnline) {
+      alert(`${astro.displayName} is currently offline.`);
+      return;
+    }
+
     if (astro.perMinuteRate === 0) {
-      alert(`✅ Connected to ${astro.name} (Free Session / AI Assistant)`);
-      // TODO: start AI / voice session
+      alert(`✅ Connected to ${astro.displayName} (Free Session / AI Assistant)`);
+      // TODO: start free session or AI assistant
       return;
     }
 
     if (wallet >= astro.perMinuteRate) {
-      alert(`✅ Connected to ${astro.name}`);
+      alert(`✅ Connected to ${astro.displayName}`);
       // TODO: start paid session
     } else {
       if (window.confirm("Insufficient balance. Add money to wallet?")) {
@@ -83,19 +88,13 @@ export default function App() {
       <header className="flex justify-between items-center py-4">
         <h2>🔯 Astrotalk</h2>
         <div className="flex items-center gap-3">
-          {/* Home button */}
           <button onClick={() => nav("/")} className="btn">🏠 Home</button>
 
           {isAuthed() && (
             <>
-              {/* Wallet balance + Wallet page */}
               <span>💰 Wallet: ₹{wallet}</span>
               <button className="btn" onClick={() => nav("/wallet")}>Wallet</button>
-
-              {/* Dashboard */}
               <button className="btn" onClick={() => nav("/dashboard")}>Dashboard</button>
-
-              {/* Logout */}
               <button className="btn" onClick={() => logout(nav)}>Logout</button>
             </>
           )}
@@ -113,13 +112,21 @@ export default function App() {
       <h3 className="mt-4">Available Astrologers</h3>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
         {astrologers.map((astro) => (
-          <div key={astro._id} className="card">
-            <h4>{astro.name}</h4>
-            <p>{astro.profession}</p>
-            <p>
-              {astro.perMinuteRate === 0 ? "Free" : `₹${astro.perMinuteRate}/min`}
+          <div key={astro._id} className="card p-4 border rounded shadow">
+            <h4 className="font-bold">{astro.displayName}</h4>
+            {astro.expertise?.length > 0 && (
+              <p className="text-sm text-gray-600">Expertise: {astro.expertise.join(", ")}</p>
+            )}
+            {astro.languages?.length > 0 && (
+              <p className="text-sm text-gray-600">Languages: {astro.languages.join(", ")}</p>
+            )}
+            <p className="mt-2">
+              {astro.perMinuteRate === 0 ? "Free Session" : `₹${astro.perMinuteRate}/min`}
             </p>
-            <button className="btn" onClick={() => handleConnect(astro)}>
+            <p className={`font-semibold ${astro.isOnline ? "text-green-600" : "text-gray-500"}`}>
+              {astro.isOnline ? "Online" : "Offline"}
+            </p>
+            <button className="btn mt-2 w-full" onClick={() => handleConnect(astro)}>
               Connect
             </button>
           </div>
