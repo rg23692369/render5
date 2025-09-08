@@ -19,7 +19,7 @@ services:
       - key: JWT_SECRET
         value: "aa26ffad684c359ec9353b"
       - key: CLIENT_URL
-        value: "https://astrotalk-client-ustn.onrender.com"
+        value: "https://astrotalk-client-ustn.onrender.com,http://localhost:5173"
       - key: RAZORPAY_KEY_ID
         value: "rzp_test_R9C1HiBHTDcATb"
       - key: RAZORPAY_KEY_SECRET
