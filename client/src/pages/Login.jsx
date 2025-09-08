@@ -1,24 +1,25 @@
-import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import api from '../lib/api'
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import api from '../lib/api';
 
 export default function Login() {
-  const nav = useNavigate()
-  const [form, setForm] = useState({ emailOrUsername:'', password:'' })
-  const [err, setErr] = useState('')
+  const nav = useNavigate();
+  const [form, setForm] = useState({ emailOrUsername: '', password: '' });
+  const [err, setErr] = useState('');
 
   const submit = async (e) => {
-    e.preventDefault()
-    setErr('')
+    e.preventDefault();
+    setErr('');
     try {
-      const { data } = await api.post('/auth/login', form)
-      localStorage.setItem('token', data.token)
-      if (data.user.role === 'astrologer') nav('/dashboard/astrologer')
-      else nav('/dashboard/user')
+      const { data } = await api.post('/auth/login', form);
+      localStorage.setItem('token', data.token);
+
+      if (data.user.role === 'astrologer') nav('/dashboard/astrologer');
+      else nav('/dashboard/user');
     } catch (e) {
-      setErr(e?.response?.data?.error || e.message)
+      setErr(e?.response?.data?.error || e.message);
     }
-  }
+  };
 
   return (
     <div className="container">
@@ -34,5 +35,5 @@ export default function Login() {
         </form>
       </div>
     </div>
-  )
+  );
 }
