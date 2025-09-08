@@ -8,7 +8,7 @@ services:
     plan: free
     branch: main
     region: oregon
-    rootDir: backend
+    rootDir: server
     envVars:
       - key: NODE_ENV
         value: production
@@ -58,7 +58,7 @@ services:
     plan: free
     branch: main
     region: oregon
-    rootDir: frontend
+    rootDir: client
     buildCommand: "npm install && npm run build"
     startCommand: "npx serve -s dist -l $PORT"
     envVars:
