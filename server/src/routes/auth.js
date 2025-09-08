@@ -20,9 +20,10 @@ router.post("/signup", async (req, res) => {
   try {
     const { username, email, password, role } = req.body;
     if (!username || !email || !password) {
-      return res.status(400).json({ error: "username, email, password required" });
+      return res.status(400).json({ error: "Username, email, and password are required" });
     }
 
+    // Check if user already exists
     const exists = await User.findOne({ $or: [{ email }, { username }] });
     if (exists) return res.status(400).json({ error: "User already exists" });
 
@@ -34,7 +35,7 @@ router.post("/signup", async (req, res) => {
       await AstrologerProfile.create({
         user: user._id,
         displayName: username,
-        perMinuteRate: 0, // default free session
+        perMinuteRate: 0, // default free
         isOnline: false,  // default offline
         languages: [],
         expertise: [],
@@ -62,7 +63,7 @@ router.post("/login", async (req, res) => {
     const ok = await bcrypt.compare(password, user.password);
     if (!ok) return res.status(400).json({ error: "Invalid credentials" });
 
-    // Set astrologer online on login
+    // Set astrologer online if logged in
     if (user.role === "astrologer") {
       await AstrologerProfile.findOneAndUpdate(
         { user: user._id },
@@ -93,5 +94,3 @@ router.post("/logout", isAuthenticated, async (req, res) => {
 });
 
 export default router;
-
-
