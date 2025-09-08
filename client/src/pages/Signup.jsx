@@ -1,24 +1,25 @@
-import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import api from '../lib/api'
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import api from '../lib/api';
 
 export default function Signup() {
-  const nav = useNavigate()
-  const [form, setForm] = useState({ username:'', email:'', password:'', role:'user' })
-  const [err, setErr] = useState('')
+  const nav = useNavigate();
+  const [form, setForm] = useState({ username:'', email:'', password:'', role:'user' });
+  const [err, setErr] = useState('');
 
   const submit = async (e) => {
-    e.preventDefault()
-    setErr('')
+    e.preventDefault();
+    setErr('');
     try {
-      const { data } = await api.post('/auth/signup', form)
-      localStorage.setItem('token', data.token)
-      if (data.user.role === 'astrologer') nav('/dashboard/astrologer')
-      else nav('/dashboard/user')
+      const { data } = await api.post('/auth/signup', form);
+      localStorage.setItem('token', data.token);
+
+      if (data.user.role === 'astrologer') nav('/dashboard/astrologer');
+      else nav('/dashboard/user');
     } catch (e) {
-      setErr(e?.response?.data?.error || e.message)
+      setErr(e?.response?.data?.error || e.message);
     }
-  }
+  };
 
   return (
     <div className="container">
@@ -32,7 +33,8 @@ export default function Signup() {
                  onChange={e => setForm({...form, email:e.target.value})} />
           <input className="input" placeholder="Password" type="password" value={form.password}
                  onChange={e => setForm({...form, password:e.target.value})} />
-          <select className="input" value={form.role} onChange={e => setForm({...form, role:e.target.value})}>
+          <select className="input" value={form.role} 
+                  onChange={e => setForm({...form, role:e.target.value})}>
             <option value="user">User</option>
             <option value="astrologer">Astrologer</option>
           </select>
@@ -40,5 +42,5 @@ export default function Signup() {
         </form>
       </div>
     </div>
-  )
+  );
 }
