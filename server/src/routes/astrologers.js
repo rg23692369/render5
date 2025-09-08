@@ -60,14 +60,13 @@ router.put(
         isOnline,
       } = req.body;
 
-      // ✅ Ensure defaults if not provided
       const updateData = {
         displayName: displayName || req.user.username,
         bio: bio || "",
         languages: Array.isArray(languages) ? languages : [],
         expertise: Array.isArray(expertise) ? expertise : [],
         perMinuteRate: perMinuteRate != null ? perMinuteRate : 0,
-        isOnline: isOnline != null ? isOnline : true, // default true when updating
+        isOnline: isOnline != null ? isOnline : true,
       };
 
       const profile = await AstrologerProfile.findOneAndUpdate(
@@ -85,4 +84,3 @@ router.put(
 );
 
 export default router;
-
