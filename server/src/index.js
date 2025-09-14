@@ -1,3 +1,4 @@
+// backend/server.js
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
@@ -15,28 +16,28 @@ import aiRoutes from "./routes/ai.js";
 // Load environment variables
 dotenv.config();
 
+// App setup
 const app = express();
 const PORT = process.env.PORT || 4000;
 const MONGO_URI = process.env.MONGO_URI || process.env.MONGODB_URI;
 
 // ✅ Middleware
 app.use(express.json());
-app.use(helmet()); // Security headers
-app.use(morgan("combined")); // Logging
+app.use(helmet()); // Secure HTTP headers
+app.use(morgan("dev")); // HTTP logging
 
-// ✅ CORS setup (local + deployed frontend)
+// ✅ CORS setup
 const allowedOrigins = process.env.CLIENT_URL
   ? process.env.CLIENT_URL.split(",")
   : ["http://localhost:5173"];
 
 app.use(
   cors({
-    origin: function (origin, callback) {
-      if (!origin) return callback(null, true); // mobile apps or curl
-      if (!allowedOrigins.includes(origin)) {
-        return callback(new Error(`CORS policy: ${origin} not allowed`), false);
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        return callback(null, true);
       }
-      return callback(null, true);
+      return callback(new Error(`CORS policy: ${origin} not allowed`), false);
     },
     credentials: true,
   })
@@ -54,13 +55,13 @@ app.use("/api/bookings", bookingRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/ai", aiRoutes);
 
-// ✅ Environment checks
+// ✅ Validate required envs
 if (!MONGO_URI) {
   console.error("❌ Missing MONGO_URI/MONGODB_URI");
   process.exit(1);
 }
 if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
-  console.warn("⚠️ Razorpay keys missing → Payments will run in dummy mode.");
+  console.warn("⚠️ Razorpay keys missing → payments may not work properly.");
 }
 
 // ✅ Connect to MongoDB & start server
@@ -71,7 +72,7 @@ mongoose
   .then(() => {
     console.log("✅ MongoDB connected");
     app.listen(PORT, "0.0.0.0", () => {
-      console.log(`🚀 Server running on port ${PORT}`);
+      console.log(`🚀 Server running at http://localhost:${PORT}`);
     });
   })
   .catch((err) => {
@@ -81,6 +82,6 @@ mongoose
 
 // ✅ Global error handler
 app.use((err, req, res, next) => {
-  console.error("❌ Server error:", err);
-  res.status(500).json({ error: "Something went wrong!" });
+  console.error("❌ Server error:", err.message || err);
+  res.status(500).json({ error: "Internal server error" });
 });
